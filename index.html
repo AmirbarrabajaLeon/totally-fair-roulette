@@ -63,48 +63,23 @@
 
   body {
     font-family: 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg);
+    background:
+      radial-gradient(at 20% 10%, rgba(102,126,234,0.12) 0%, transparent 40%),
+      radial-gradient(at 80% 20%, rgba(240,147,251,0.1) 0%, transparent 45%),
+      radial-gradient(at 60% 80%, rgba(79,172,254,0.08) 0%, transparent 40%),
+      var(--bg);
     color: var(--text);
     min-height: 100vh;
   }
 
-  .blob { position: fixed; z-index: -1; pointer-events: none; filter: blur(60px); }
-
-  .blob-1 {
-    top: -30%;
-    left: -10%;
-    width: 60vw;
-    height: 60vw;
-    background: radial-gradient(circle, rgba(102,126,234,0.2), transparent 70%);
+  body[data-theme="dark"] {
+    background:
+      radial-gradient(at 20% 10%, rgba(74,63,122,0.18) 0%, transparent 40%),
+      radial-gradient(at 80% 20%, rgba(122,95,168,0.15) 0%, transparent 45%),
+      radial-gradient(at 60% 80%, rgba(59,111,160,0.12) 0%, transparent 40%),
+      var(--bg);
   }
 
-  .blob-2 {
-    bottom: -15%;
-    right: -10%;
-    width: 50vw;
-    height: 50vw;
-    background: radial-gradient(circle, rgba(240,147,251,0.15), transparent 70%);
-  }
-
-  .blob-3 {
-    top: 40%;
-    left: 55%;
-    width: 40vw;
-    height: 40vw;
-    background: radial-gradient(circle, rgba(79,172,254,0.12), transparent 70%);
-  }
-
-  body[data-theme="dark"] .blob-1 {
-    background: radial-gradient(circle, rgba(74,63,122,0.25), transparent 70%);
-  }
-
-  body[data-theme="dark"] .blob-2 {
-    background: radial-gradient(circle, rgba(122,95,168,0.2), transparent 70%);
-  }
-
-  body[data-theme="dark"] .blob-3 {
-    background: radial-gradient(circle, rgba(59,111,160,0.18), transparent 70%);
-  }
 
   header {
     background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #667eea);
@@ -560,7 +535,6 @@
 </style>
 </head>
 <body>
-<div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 <canvas id="confetti"></canvas>
 
 <header>
