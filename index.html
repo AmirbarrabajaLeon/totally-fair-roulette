@@ -655,6 +655,7 @@
   let spinning = false;
   let rigged = false;
   let riggedTarget = '';
+  let lastTickIndex = -1;
 
   const COLORS = [
     '#667eea', '#764ba2', '#f093fb', '#4facfe',
@@ -689,6 +690,19 @@
     osc.connect(gain).connect(audioCtx.destination);
     osc.start();
     osc.stop(audioCtx.currentTime + 0.05);
+  }
+
+  function playTick() {
+    if (muted || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = 500;
+    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.06);
   }
 
   function playWin() {
@@ -836,6 +850,16 @@
       const eased = easeOutCubic(progress);
 
       currentAngle = startAngle + totalRotation * eased;
+
+      if (!muted && audioCtx && participants.length > 1) {
+        const normalized = ((pointerAngle - currentAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+        const currentTickIndex = Math.floor(normalized / sliceAngle) % participants.length;
+        if (currentTickIndex !== lastTickIndex) {
+          playTick();
+          lastTickIndex = currentTickIndex;
+        }
+      }
+
       drawWheel();
 
       if (progress < 1) {
