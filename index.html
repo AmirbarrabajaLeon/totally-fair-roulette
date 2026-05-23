@@ -68,7 +68,7 @@
     min-height: 100vh;
   }
 
-  .blob { position: fixed; z-index: -1; pointer-events: none; }
+  .blob { position: fixed; z-index: -1; pointer-events: none; filter: blur(60px); }
 
   .blob-1 {
     top: -30%;
@@ -160,6 +160,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+    animation-delay: 0s;
   }
 
   .wheel-wrapper {
@@ -214,6 +217,9 @@
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 2px 16px var(--card-shadow);
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+    animation-delay: 0.15s;
   }
 
   .input-section h2 {
@@ -281,6 +287,9 @@
     display: flex;
     gap: 32px;
     align-items: center;
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+    animation-delay: 0.3s;
   }
 
   .instructions-text h3 {
@@ -298,7 +307,9 @@
   .duck-pet {
     font-size: 80px;
     line-height: 1;
-    animation: wobble 2s ease-in-out infinite;
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out forwards, wobble 2s ease-in-out infinite;
+    animation-delay: 0.45s;
     user-select: none;
   }
 
@@ -311,6 +322,11 @@
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .modal-overlay {
