@@ -510,6 +510,15 @@
     to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
   }
 
+  #confetti {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 300;
+  }
+
   @media (max-width: 768px) {
     .main-container {
       flex-direction: column;
@@ -727,6 +736,71 @@
     muteToggle.textContent = muted ? '🔇' : '🔊';
   });
 
+  const confettiCanvas = document.getElementById('confetti');
+  const confettiCtx = confettiCanvas.getContext('2d');
+  let confettiAnimId = null;
+
+  function resizeConfetti() {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeConfetti);
+  resizeConfetti();
+
+  function burstConfetti() {
+    if (confettiAnimId) { cancelAnimationFrame(confettiAnimId); confettiAnimId = null; }
+    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+    const particles = [];
+    const count = 100;
+    const centerX = confettiCanvas.width / 2;
+    const centerY = confettiCanvas.height / 3;
+
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: centerX,
+        y: centerY,
+        vx: (Math.random() - 0.5) * 14,
+        vy: (Math.random() - 1) * 12 - 2,
+        size: Math.random() * 5 + 3,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.2,
+        life: 1,
+        decay: 0.008 + Math.random() * 0.006
+      });
+    }
+
+    function render(now) {
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      let alive = false;
+
+      particles.forEach(p => {
+        if (p.life <= 0) return;
+        alive = true;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.18;
+        p.vx *= 0.97;
+        p.rotation += p.rotSpeed;
+        p.life -= p.decay;
+
+        confettiCtx.save();
+        confettiCtx.translate(p.x, p.y);
+        confettiCtx.rotate(p.rotation);
+        confettiCtx.globalAlpha = Math.max(0, p.life);
+        confettiCtx.fillStyle = p.color;
+        confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size * 1.2, p.size);
+        confettiCtx.restore();
+      });
+
+      if (alive) confettiAnimId = requestAnimationFrame(render);
+      else { confettiAnimId = null; confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); }
+    }
+
+    confettiAnimId = requestAnimationFrame(render);
+  }
+
   function resizeCanvas() {
     if (spinning) return;
     const wrapper = document.querySelector('.wheel-wrapper');
@@ -887,6 +961,7 @@
     winnerName.textContent = name;
     winnerBanner.classList.add('active');
     initAudio(); playWin();
+    burstConfetti();
   }
 
   function closeWinner() {
@@ -925,5 +1000,6 @@
   window.addEventListener('resize', resizeCanvas);
 </script>
 
+  <canvas id="confetti"></canvas>
 </body>
 </html>
