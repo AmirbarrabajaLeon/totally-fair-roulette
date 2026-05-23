@@ -581,6 +581,7 @@
 </head>
 <body>
 <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+<canvas id="confetti"></canvas>
 
 <header>
   <div>
@@ -1002,10 +1003,9 @@
     closeModal();
   }
 
-  requestAnimationFrame(() => { resizeCanvas(); });
+  requestAnimationFrame(resizeCanvas);
   window.addEventListener('resize', resizeCanvas);
 </script>
 
-  <canvas id="confetti"></canvas>
 </body>
 </html>
