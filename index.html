@@ -6,7 +6,7 @@
 <title>Fair &amp; Square Roulette</title>
 <style>
   :root {
-    --bg: #f5f5f7;
+    --bg: #eef2f7;
     --text: #1d1d1f;
     --text-secondary: #666;
     --text-muted: #999;
@@ -63,22 +63,77 @@
 
   body {
     font-family: 'Segoe UI', system-ui, sans-serif;
-    background:
-      radial-gradient(at 20% 10%, rgba(102,126,234,0.12) 0%, transparent 40%),
-      radial-gradient(at 80% 20%, rgba(240,147,251,0.1) 0%, transparent 45%),
-      radial-gradient(at 60% 80%, rgba(79,172,254,0.08) 0%, transparent 40%),
-      var(--bg);
+    background: var(--bg);
     color: var(--text);
     min-height: 100vh;
   }
 
   body[data-theme="dark"] {
-    background:
-      radial-gradient(at 20% 10%, rgba(74,63,122,0.18) 0%, transparent 40%),
-      radial-gradient(at 80% 20%, rgba(122,95,168,0.15) 0%, transparent 45%),
-      radial-gradient(at 60% 80%, rgba(59,111,160,0.12) 0%, transparent 40%),
-      var(--bg);
+    background: var(--bg);
   }
+
+  .background {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+    background: #eef2f7;
+  }
+
+  body[data-theme="dark"] .background {
+    background: #3E1E68;
+  }
+
+  .background span {
+    width: 19vmin;
+    height: 19vmin;
+    border-radius: 19vmin;
+    backface-visibility: hidden;
+    position: absolute;
+    animation: move;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes move {
+    100% {
+      transform: translate3d(0, 0, 1px) rotate(360deg);
+    }
+  }
+
+  /* Light mode pastel aurora */
+  .background span:nth-child(0)  { color: #E8A0BF; top: 12%; left: 46%; animation-duration: 110s; animation-delay: -60s; transform-origin: 7vw -9vh;  box-shadow: -38vmin 0 5.661683348559423vmin currentColor; }
+  .background span:nth-child(1)  { color: #A0C8E8; top: 42%; left: 66%; animation-duration: 29s;  animation-delay: -106s; transform-origin: -19vw -11vh; box-shadow: 38vmin 0 5.660364776853558vmin currentColor; }
+  .background span:nth-child(2)  { color: #B8A0D8; top: 8%;  left: 42%; animation-duration: 19s;  animation-delay: -14s;  transform-origin: -6vw -21vh;  box-shadow: -38vmin 0 5.692619830312277vmin currentColor; }
+  .background span:nth-child(3)  { color: #F0C8A0; top: 28%; left: 64%; animation-duration: 113s; animation-delay: -74s;  transform-origin: 25vw 19vh;   box-shadow: -38vmin 0 4.80331125045894vmin currentColor; }
+  .background span:nth-child(4)  { color: #E8A0BF; top: 75%; left: 29%; animation-duration: 111s; animation-delay: -97s;  transform-origin: -8vw -19vh;   box-shadow: -38vmin 0 5.04287022280873vmin currentColor; }
+  .background span:nth-child(5)  { color: #A0C8E8; top: 60%; left: 2%;  animation-duration: 30s;  animation-delay: -38s;  transform-origin: -5vw -2vh;    box-shadow: -38vmin 0 5.692961941943535vmin currentColor; }
+  .background span:nth-child(6)  { color: #B8A0D8; top: 17%; left: 5%;  animation-duration: 100s; animation-delay: -48s;  transform-origin: -11vw -19vh;  box-shadow: 38vmin 0 5.047768648162751vmin currentColor; }
+  .background span:nth-child(7)  { color: #F0C8A0; top: 89%; left: 68%; animation-duration: 52s;  animation-delay: -92s;  transform-origin: -4vw -15vh;   box-shadow: 38vmin 0 5.481358042254038vmin currentColor; }
+  .background span:nth-child(8)  { color: #E8A0BF; top: 24%; left: 53%; animation-duration: 106s; animation-delay: -109s; transform-origin: -18vw 0vh;    box-shadow: 38vmin 0 5.1536290610797035vmin currentColor; }
+  .background span:nth-child(9)  { color: #A0C8E8; top: 97%; left: 46%; animation-duration: 79s;  animation-delay: -67s;  transform-origin: 12vw -13vh;   box-shadow: 38vmin 0 5.609736993952433vmin currentColor; }
+  .background span:nth-child(10) { color: #B8A0D8; top: 6%;  left: 61%; animation-duration: 108s; animation-delay: -14s;  transform-origin: 3vw -11vh;    box-shadow: -38vmin 0 5.548397178413995vmin currentColor; }
+  .background span:nth-child(11) { color: #F0C8A0; top: 63%; left: 36%; animation-duration: 100s; animation-delay: -110s; transform-origin: -4vw 12vh;    box-shadow: 38vmin 0 5.007944233143082vmin currentColor; }
+  .background span:nth-child(12) { color: #E8A0BF; top: 74%; left: 18%; animation-duration: 10s;  animation-delay: -90s;  transform-origin: -6vw 24vh;    box-shadow: -38vmin 0 5.569581966869589vmin currentColor; }
+
+  /* Dark mode neon aurora overrides */
+  body[data-theme="dark"] .background span:nth-child(0)  { color: #E45A84; }
+  body[data-theme="dark"] .background span:nth-child(1)  { color: #FFACAC; }
+  body[data-theme="dark"] .background span:nth-child(2)  { color: #FFACAC; }
+  body[data-theme="dark"] .background span:nth-child(3)  { color: #583C87; }
+  body[data-theme="dark"] .background span:nth-child(4)  { color: #E45A84; }
+  body[data-theme="dark"] .background span:nth-child(5)  { color: #FFACAC; }
+  body[data-theme="dark"] .background span:nth-child(6)  { color: #E45A84; }
+  body[data-theme="dark"] .background span:nth-child(7)  { color: #583C87; }
+  body[data-theme="dark"] .background span:nth-child(8)  { color: #E45A84; }
+  body[data-theme="dark"] .background span:nth-child(9)  { color: #FFACAC; }
+  body[data-theme="dark"] .background span:nth-child(10) { color: #583C87; }
+  body[data-theme="dark"] .background span:nth-child(11) { color: #E45A84; }
+  body[data-theme="dark"] .background span:nth-child(12) { color: #FFACAC; }
 
 
   header {
@@ -535,6 +590,21 @@
 </style>
 </head>
 <body>
+<div class="background">
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
 <canvas id="confetti"></canvas>
 
 <header>
