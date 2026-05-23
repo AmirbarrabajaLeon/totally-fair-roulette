@@ -503,20 +503,31 @@
     spinBtn.disabled = true;
 
     const sliceAngle = (Math.PI * 2) / participants.length;
-    let targetAngle;
+    const pointerAngle = Math.PI * 1.5;
+
+    let totalRotation;
 
     if (rigged && riggedTarget && participants.includes(riggedTarget)) {
       const targetIndex = participants.indexOf(riggedTarget);
       const targetCenter = targetIndex * sliceAngle + sliceAngle / 2;
-      const pointerOffset = Math.PI * 1.5;
-      const fullRotations = Math.PI * 2 * (8 + Math.random() * 4);
-      targetAngle = fullRotations + (pointerOffset - targetCenter);
+
+      const safetyOffset = (Math.random() - 0.5) * sliceAngle * 0.4;
+      const adjustedTarget = targetCenter + safetyOffset;
+
+      const desiredMod = ((pointerAngle - adjustedTarget) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+      const currentMod = ((currentAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+
+      let delta = desiredMod - currentMod;
+      if (delta < 1e-10) delta += Math.PI * 2;
+
+      const numFullRotations = 15 + Math.floor(Math.random() * 10);
+      const extraRotations = numFullRotations * Math.PI * 2;
+      totalRotation = extraRotations + delta;
     } else {
-      targetAngle = Math.PI * 2 * (8 + Math.random() * 4) + Math.random() * Math.PI * 2;
+      totalRotation = Math.PI * 2 * (20 + Math.random() * 15) + Math.random() * Math.PI * 2;
     }
 
     const startAngle = currentAngle;
-    const totalRotation = targetAngle - startAngle;
     const duration = 5000;
     const startTime = performance.now();
 
@@ -541,10 +552,12 @@
         if (rigged && riggedTarget && participants.includes(riggedTarget)) {
           showWinner(riggedTarget);
         } else {
-          const normalizedAngle = (((Math.PI * 1.5 - currentAngle) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+          const normalizedAngle = ((pointerAngle - currentAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
           const winnerIndex = Math.floor(normalizedAngle / sliceAngle) % participants.length;
           showWinner(participants[winnerIndex]);
         }
+
+        currentAngle = ((currentAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
       }
     }
 
