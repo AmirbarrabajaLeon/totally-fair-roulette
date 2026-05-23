@@ -14,7 +14,7 @@ Ideas for styling improvements and features for the wheel picker roulette.
 | 4 | ~~Confetti on winner reveal~~ | Low | High |
 | 5 | ~~Sound effects (click + win sounds with mute toggle)~~ | Low | High |
 | 6 | ~~Better pointer (glowing or arrow-shaped)~~ | Low | Medium |
-| 7 | Smooth fade-in animations (staggered entry for page elements) | Low | Medium |
+| 7 | ~~Smooth fade-in animations (staggered entry for page elements)~~ | Low | Medium |
 | 8 | ~~Responsive layout (stack on mobile, side-by-side on desktop)~~ | Medium | High |
 
 ---
