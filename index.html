@@ -59,14 +59,14 @@
 
   .pointer {
     position: absolute;
-    top: -12px;
+    top: -8px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: 14px solid transparent;
-    border-right: 14px solid transparent;
-    border-top: 28px solid #1d1d1f;
+    border-left: clamp(8px, 3.5vw, 14px) solid transparent;
+    border-right: clamp(8px, 3.5vw, 14px) solid transparent;
+    border-top: clamp(16px, 7vw, 28px) solid #1d1d1f;
     z-index: 10;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
   }
@@ -357,7 +357,7 @@
   <div class="roulette-section">
     <div class="wheel-wrapper">
       <div class="pointer"></div>
-      <canvas id="wheel" width="400" height="400"></canvas>
+      <canvas id="wheel"></canvas>
     </div>
     <button class="spin-btn" id="spinBtn" onclick="spinWheel()">SPIN</button>
   </div>
@@ -435,6 +435,16 @@
     '#0250c5', '#d4fc79', '#96e6a1', '#dfe6e9'
   ];
 
+  function resizeCanvas() {
+    if (spinning) return;
+    const wrapper = document.querySelector('.wheel-wrapper');
+    const size = wrapper.offsetWidth;
+    if (size <= 0) return;
+    canvas.width = size;
+    canvas.height = size;
+    drawWheel();
+  }
+
   function getNames() {
     return namesInput.value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
   }
@@ -484,7 +494,8 @@
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#fff';
-      ctx.font = `bold ${Math.min(16, 200 / participants.length)}px Segoe UI, system-ui, sans-serif`;
+      const fontSize = Math.max(8, Math.min(16, 200 / participants.length) * (r / 196));
+      ctx.font = `bold ${fontSize}px Segoe UI, system-ui, sans-serif`;
       ctx.shadowColor = 'rgba(0,0,0,0.3)';
       ctx.shadowBlur = 4;
       ctx.fillText(name, r - 20, 0);
@@ -492,7 +503,7 @@
     });
 
     ctx.beginPath();
-    ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+    ctx.arc(cx, cy, Math.max(4, Math.min(8, r * 0.04)), 0, Math.PI * 2);
     ctx.fillStyle = '#1d1d1f';
     ctx.fill();
   }
@@ -601,7 +612,8 @@
     closeModal();
   }
 
-  drawWheel();
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 </script>
 
 </body>
