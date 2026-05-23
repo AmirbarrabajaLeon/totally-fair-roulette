@@ -488,6 +488,7 @@
     <span class="subtitle">Spin the wheel, pick a winner!</span>
   </div>
   <span style="font-size: 2rem;">🎡</span>
+  <button id="muteToggle" class="theme-toggle" aria-label="Toggle sound">🔊</button>
   <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
 </header>
 
@@ -581,6 +582,48 @@
     resizeCanvas();
   });
 
+  let audioCtx;
+  let muted = false;
+
+  function initAudio() {
+    if (!audioCtx) audioCtx = new AudioContext();
+  }
+
+  function playClick() {
+    if (muted || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = 800;
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.05);
+  }
+
+  function playWin() {
+    if (muted || !audioCtx) return;
+    [523.25, 659.25, 783.99].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.1);
+      gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + i * 0.1 + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.1 + 0.5);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime + i * 0.1);
+      osc.stop(audioCtx.currentTime + i * 0.1 + 0.5);
+    });
+  }
+
+  const muteToggle = document.getElementById('muteToggle');
+  muteToggle.addEventListener('click', () => {
+    muted = !muted;
+    muteToggle.textContent = muted ? '🔇' : '🔊';
+  });
+
   function resizeCanvas() {
     if (spinning) return;
     const wrapper = document.querySelector('.wheel-wrapper');
@@ -663,6 +706,7 @@
     if (spinning || participants.length === 0) return;
     spinning = true;
     spinBtn.disabled = true;
+    initAudio(); playClick();
 
     const sliceAngle = (Math.PI * 2) / participants.length;
     const pointerAngle = Math.PI * 1.5;
@@ -729,6 +773,7 @@
   function showWinner(name) {
     winnerName.textContent = name;
     winnerBanner.classList.add('active');
+    initAudio(); playWin();
   }
 
   function closeWinner() {
