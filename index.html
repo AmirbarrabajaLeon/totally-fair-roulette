@@ -170,16 +170,16 @@
 
   .pointer {
     position: absolute;
-    top: -8px;
+    top: -10px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: clamp(8px, 3.5vw, 14px) solid transparent;
-    border-right: clamp(8px, 3.5vw, 14px) solid transparent;
-    border-top: clamp(16px, 7vw, 28px) solid var(--pointer-color);
+    border-left: clamp(9px, 4vw, 16px) solid transparent;
+    border-right: clamp(9px, 4vw, 16px) solid transparent;
+    border-top: clamp(18px, 8vw, 32px) solid var(--pointer-color);
     z-index: 10;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 0 6px var(--accent)) drop-shadow(0 0 14px var(--accent-2)) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
   }
 
   canvas {
