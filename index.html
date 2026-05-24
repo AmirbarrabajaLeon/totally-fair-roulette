@@ -328,24 +328,34 @@
     cursor: pointer;
     position: relative;
     display: inline-block;
-    transition: filter 0.3s ease;
+    transition: filter 0.5s ease;
+    filter: drop-shadow(0 0 2px rgba(210, 195, 160, 0.15));
   }
 
   .duck-pet.rigged {
-    filter: drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 12px var(--accent-2));
-    animation: fadeInUp 0.5s ease-out forwards, wobble 2s ease-in-out infinite, duckGlow 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 3px rgba(235, 205, 100, 0.22));
+    animation: fadeInUp 0.5s ease-out forwards, wobble 2s ease-in-out infinite, duckGlow 4s ease-in-out infinite;
   }
 
   @keyframes duckGlow {
-    0%, 100% { filter: drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 12px var(--accent-2)); }
-    50% { filter: drop-shadow(0 0 8px var(--accent)) drop-shadow(0 0 20px var(--accent-2)); }
+    0%, 100% { filter: drop-shadow(0 0 3px rgba(235, 205, 100, 0.18)); }
+    50% { filter: drop-shadow(0 0 4px rgba(235, 205, 100, 0.28)); }
   }
 
   @keyframes duckBounce {
-    0%, 100% { transform: translateY(0) rotate(-5deg); }
-    25% { transform: translateY(-12px) rotate(0deg); }
-    50% { transform: translateY(0) rotate(5deg); }
-    75% { transform: translateY(-6px) rotate(0deg); }
+    0%, 100% { transform: translateY(0) scale(1); }
+    30% { transform: translateY(-18px) scale(1.1, 0.9); }
+    50% { transform: translateY(0) scale(0.95, 1.05); }
+    70% { transform: translateY(-8px) scale(1.02, 0.98); }
+  }
+
+  .duck-wrapper {
+    display: inline-block;
+    pointer-events: none;
+  }
+
+  .duck-wrapper.bouncing {
+    animation: duckBounce 0.45s ease-out;
   }
 
   @keyframes wobble {
@@ -650,7 +660,7 @@
         <li>Hit <strong>SPIN</strong> and see who wins!</li>
       </ol>
     </div>
-    <div class="duck-pet" id="duckPet">🦆</div>
+    <div class="duck-pet" id="duckPet"><span class="duck-wrapper" id="duckWrapper">🦆</span></div>
   </div>
 </div>
 
@@ -692,6 +702,7 @@
   const winnerBanner = document.getElementById('winnerBanner');
   const winnerName = document.getElementById('winnerName');
   const duckPet = document.getElementById('duckPet');
+  const duckWrapper = document.getElementById('duckWrapper');
 
   let participants = [];
   let currentAngle = 0;
@@ -716,75 +727,98 @@
   });
 
   /* Secret Agent Duck triggers */
-  let duckClickCount = 0;
-  let duckClickTimer = null;
   let duckLongPressTimer = null;
 
   function playQuack() {
     if (muted || !audioCtx) return;
     const now = audioCtx.currentTime;
 
-    // Body of quack - descending sawtooth
+    // Main quack body - descending sawtooth with rasp
     const osc1 = audioCtx.createOscillator();
     const gain1 = audioCtx.createGain();
+    const filter1 = audioCtx.createBiquadFilter();
     osc1.type = 'sawtooth';
-    osc1.frequency.setValueAtTime(450, now);
-    osc1.frequency.exponentialRampToValueAtTime(280, now + 0.12);
-    gain1.gain.setValueAtTime(0.08, now);
-    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-    osc1.connect(gain1).connect(audioCtx.destination);
+    osc1.frequency.setValueAtTime(520, now);
+    osc1.frequency.exponentialRampToValueAtTime(180, now + 0.28);
+    filter1.type = 'lowpass';
+    filter1.frequency.setValueAtTime(1200, now);
+    filter1.frequency.exponentialRampToValueAtTime(400, now + 0.25);
+    filter1.Q.value = 3;
+    gain1.gain.setValueAtTime(0.06, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+    osc1.connect(filter1).connect(gain1).connect(audioCtx.destination);
     osc1.start(now);
-    osc1.stop(now + 0.15);
+    osc1.stop(now + 0.35);
 
-    // Harmonic layer - triangle for warmth
+    // Warmth layer - triangle an octave below
     const osc2 = audioCtx.createOscillator();
     const gain2 = audioCtx.createGain();
     osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(900, now);
-    osc2.frequency.exponentialRampToValueAtTime(560, now + 0.12);
-    gain2.gain.setValueAtTime(0.03, now);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc2.frequency.setValueAtTime(260, now);
+    osc2.frequency.exponentialRampToValueAtTime(90, now + 0.28);
+    gain2.gain.setValueAtTime(0.04, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
     osc2.connect(gain2).connect(audioCtx.destination);
     osc2.start(now);
-    osc2.stop(now + 0.15);
+    osc2.stop(now + 0.35);
+
+    // Rasp/noise layer for realism
+    const bufferSize = audioCtx.sampleRate * 0.3;
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = Math.random() * 2 - 1;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = noiseBuffer;
+    const noiseGain = audioCtx.createGain();
+    const noiseFilter = audioCtx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.setValueAtTime(800, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(300, now + 0.25);
+    noiseFilter.Q.value = 1.5;
+    noiseGain.gain.setValueAtTime(0.025, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    noise.connect(noiseFilter).connect(noiseGain).connect(audioCtx.destination);
+    noise.start(now);
+    noise.stop(now + 0.35);
   }
 
   function triggerDuckBounce() {
-    duckPet.style.animation = 'none';
-    duckPet.offsetHeight; // force reflow
-    duckPet.style.animation = 'duckBounce 0.4s ease-out';
+    duckWrapper.classList.remove('bouncing');
+    duckWrapper.offsetHeight; // force reflow
+    duckWrapper.classList.add('bouncing');
     setTimeout(() => {
-      duckPet.style.animation = '';
-      if (rigged) {
-        duckPet.classList.add('rigged');
-      }
-    }, 400);
+      duckWrapper.classList.remove('bouncing');
+    }, 450);
   }
 
-  function openRigModalSecret() {
-    initAudio();
-    openModal();
+  function toggleRigging() {
+    const names = getNames();
+    if (rigged) {
+      rigged = false;
+      riggedTarget = '';
+      duckPet.classList.remove('rigged');
+    } else {
+      if (names.length === 0) return;
+      if (!riggedTarget || !names.includes(riggedTarget)) {
+        riggedTarget = names[0];
+      }
+      rigged = true;
+      duckPet.classList.add('rigged');
+    }
   }
 
   duckPet.addEventListener('click', (e) => {
     initAudio();
     playQuack();
     triggerDuckBounce();
-
-    duckClickCount++;
-    if (duckClickCount === 3) {
-      openRigModalSecret();
-      duckClickCount = 0;
-      if (duckClickTimer) clearTimeout(duckClickTimer);
-    } else {
-      if (duckClickTimer) clearTimeout(duckClickTimer);
-      duckClickTimer = setTimeout(() => { duckClickCount = 0; }, 500);
-    }
   });
 
   duckPet.addEventListener('mousedown', () => {
     duckLongPressTimer = setTimeout(() => {
-      openRigModalSecret();
+      initAudio();
+      toggleRigging();
     }, 1500);
   });
 
@@ -799,7 +833,8 @@
   duckPet.addEventListener('touchstart', (e) => {
     e.preventDefault();
     duckLongPressTimer = setTimeout(() => {
-      openRigModalSecret();
+      initAudio();
+      toggleRigging();
     }, 1500);
   });
 
@@ -807,7 +842,7 @@
     if (duckLongPressTimer) clearTimeout(duckLongPressTimer);
   });
 
-  // Ctrl+Shift+R shortcut
+  // Ctrl+Shift+R shortcut opens modal
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.shiftKey && e.key === 'R') {
       e.preventDefault();
