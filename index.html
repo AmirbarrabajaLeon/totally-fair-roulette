@@ -328,18 +328,32 @@
     cursor: pointer;
     position: relative;
     display: inline-block;
-    transition: filter 0.5s ease;
-    filter: drop-shadow(0 0 2px rgba(210, 195, 160, 0.15));
   }
 
-  .duck-pet.rigged {
-    filter: drop-shadow(0 0 3px rgba(235, 205, 100, 0.22));
-    animation: fadeInUp 0.5s ease-out forwards, wobble 2s ease-in-out infinite, duckGlow 4s ease-in-out infinite;
+  .duck-pet::before {
+    content: '';
+    position: absolute;
+    inset: -15%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(210, 195, 160, 0.15) 0%, transparent 65%);
+    filter: blur(10px);
+    z-index: -1;
+    animation: duckAmbient 4s ease-in-out infinite;
   }
 
-  @keyframes duckGlow {
-    0%, 100% { filter: drop-shadow(0 0 3px rgba(235, 205, 100, 0.18)); }
-    50% { filter: drop-shadow(0 0 4px rgba(235, 205, 100, 0.28)); }
+  .duck-pet.rigged::before {
+    background: radial-gradient(circle, rgba(235, 205, 100, 0.22) 0%, transparent 65%);
+    animation: duckRiggedGlow 4s ease-in-out infinite;
+  }
+
+  @keyframes duckAmbient {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+  }
+
+  @keyframes duckRiggedGlow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.08); }
   }
 
   @keyframes duckBounce {
@@ -729,59 +743,13 @@
   /* Secret Agent Duck triggers */
   let duckLongPressTimer = null;
 
+  const quackAudio = new Audio('duck-quack.wav');
+  quackAudio.volume = 0.4;
+
   function playQuack() {
-    if (muted || !audioCtx) return;
-    const now = audioCtx.currentTime;
-
-    // Main quack body - descending sawtooth with rasp
-    const osc1 = audioCtx.createOscillator();
-    const gain1 = audioCtx.createGain();
-    const filter1 = audioCtx.createBiquadFilter();
-    osc1.type = 'sawtooth';
-    osc1.frequency.setValueAtTime(520, now);
-    osc1.frequency.exponentialRampToValueAtTime(180, now + 0.28);
-    filter1.type = 'lowpass';
-    filter1.frequency.setValueAtTime(1200, now);
-    filter1.frequency.exponentialRampToValueAtTime(400, now + 0.25);
-    filter1.Q.value = 3;
-    gain1.gain.setValueAtTime(0.06, now);
-    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
-    osc1.connect(filter1).connect(gain1).connect(audioCtx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.35);
-
-    // Warmth layer - triangle an octave below
-    const osc2 = audioCtx.createOscillator();
-    const gain2 = audioCtx.createGain();
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(260, now);
-    osc2.frequency.exponentialRampToValueAtTime(90, now + 0.28);
-    gain2.gain.setValueAtTime(0.04, now);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
-    osc2.connect(gain2).connect(audioCtx.destination);
-    osc2.start(now);
-    osc2.stop(now + 0.35);
-
-    // Rasp/noise layer for realism
-    const bufferSize = audioCtx.sampleRate * 0.3;
-    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      output[i] = Math.random() * 2 - 1;
-    }
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = noiseBuffer;
-    const noiseGain = audioCtx.createGain();
-    const noiseFilter = audioCtx.createBiquadFilter();
-    noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.setValueAtTime(800, now);
-    noiseFilter.frequency.exponentialRampToValueAtTime(300, now + 0.25);
-    noiseFilter.Q.value = 1.5;
-    noiseGain.gain.setValueAtTime(0.025, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-    noise.connect(noiseFilter).connect(noiseGain).connect(audioCtx.destination);
-    noise.start(now);
-    noise.stop(now + 0.35);
+    if (muted) return;
+    quackAudio.currentTime = 0;
+    quackAudio.play().catch(() => {});
   }
 
   function triggerDuckBounce() {
