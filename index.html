@@ -284,22 +284,6 @@
     color: var(--text-muted);
   }
 
-  .advanced-btn {
-    margin-top: 16px;
-    width: 100%;
-    padding: 10px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--adv-text);
-    background: var(--adv-bg);
-    border: 2px solid var(--adv-border);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .advanced-btn:hover { background: var(--adv-hover-bg); border-color: var(--adv-hover-border); }
-
   .instructions {
     max-width: 1100px;
     margin: 0 auto;
@@ -341,6 +325,27 @@
     animation: fadeInUp 0.5s ease-out forwards, wobble 2s ease-in-out infinite;
     animation-delay: 0.45s;
     user-select: none;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    transition: filter 0.3s ease;
+  }
+
+  .duck-pet.rigged {
+    filter: drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 12px var(--accent-2));
+    animation: fadeInUp 0.5s ease-out forwards, wobble 2s ease-in-out infinite, duckGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes duckGlow {
+    0%, 100% { filter: drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 12px var(--accent-2)); }
+    50% { filter: drop-shadow(0 0 8px var(--accent)) drop-shadow(0 0 20px var(--accent-2)); }
+  }
+
+  @keyframes duckBounce {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    25% { transform: translateY(-12px) rotate(0deg); }
+    50% { transform: translateY(0) rotate(5deg); }
+    75% { transform: translateY(-6px) rotate(0deg); }
   }
 
   @keyframes wobble {
@@ -632,7 +637,6 @@
     <h2>Participants</h2>
     <textarea id="namesInput" placeholder="Enter names, one per line..." oninput="updateWheel()"></textarea>
     <div class="participant-count" id="participantCount">0 participants</div>
-    <button class="advanced-btn" onclick="openModal()">⚙️ Advanced</button>
   </div>
 </div>
 
@@ -646,13 +650,13 @@
         <li>Hit <strong>SPIN</strong> and see who wins!</li>
       </ol>
     </div>
-    <div class="duck-pet">🦆</div>
+    <div class="duck-pet" id="duckPet">🦆</div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
   <div class="modal">
-    <h2>🎛️ Rig the Wheel!</h2>
+    <h2>⚙️ Advanced Settings</h2>
     <p>Select a participant to guarantee they win. Shhh...</p>
 
     <label for="riggedSelect">Choose the winner</label>
@@ -687,6 +691,7 @@
   const riggedToggle = document.getElementById('riggedToggle');
   const winnerBanner = document.getElementById('winnerBanner');
   const winnerName = document.getElementById('winnerName');
+  const duckPet = document.getElementById('duckPet');
 
   let participants = [];
   let currentAngle = 0;
@@ -708,6 +713,107 @@
     document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
     themeToggle.textContent = isDark ? '🌙' : '☀️';
     resizeCanvas();
+  });
+
+  /* Secret Agent Duck triggers */
+  let duckClickCount = 0;
+  let duckClickTimer = null;
+  let duckLongPressTimer = null;
+
+  function playQuack() {
+    if (muted || !audioCtx) return;
+    const now = audioCtx.currentTime;
+
+    // Body of quack - descending sawtooth
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(450, now);
+    osc1.frequency.exponentialRampToValueAtTime(280, now + 0.12);
+    gain1.gain.setValueAtTime(0.08, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc1.connect(gain1).connect(audioCtx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.15);
+
+    // Harmonic layer - triangle for warmth
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(900, now);
+    osc2.frequency.exponentialRampToValueAtTime(560, now + 0.12);
+    gain2.gain.setValueAtTime(0.03, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc2.connect(gain2).connect(audioCtx.destination);
+    osc2.start(now);
+    osc2.stop(now + 0.15);
+  }
+
+  function triggerDuckBounce() {
+    duckPet.style.animation = 'none';
+    duckPet.offsetHeight; // force reflow
+    duckPet.style.animation = 'duckBounce 0.4s ease-out';
+    setTimeout(() => {
+      duckPet.style.animation = '';
+      if (rigged) {
+        duckPet.classList.add('rigged');
+      }
+    }, 400);
+  }
+
+  function openRigModalSecret() {
+    initAudio();
+    openModal();
+  }
+
+  duckPet.addEventListener('click', (e) => {
+    initAudio();
+    playQuack();
+    triggerDuckBounce();
+
+    duckClickCount++;
+    if (duckClickCount === 3) {
+      openRigModalSecret();
+      duckClickCount = 0;
+      if (duckClickTimer) clearTimeout(duckClickTimer);
+    } else {
+      if (duckClickTimer) clearTimeout(duckClickTimer);
+      duckClickTimer = setTimeout(() => { duckClickCount = 0; }, 500);
+    }
+  });
+
+  duckPet.addEventListener('mousedown', () => {
+    duckLongPressTimer = setTimeout(() => {
+      openRigModalSecret();
+    }, 1500);
+  });
+
+  duckPet.addEventListener('mouseup', () => {
+    if (duckLongPressTimer) clearTimeout(duckLongPressTimer);
+  });
+
+  duckPet.addEventListener('mouseleave', () => {
+    if (duckLongPressTimer) clearTimeout(duckLongPressTimer);
+  });
+
+  duckPet.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    duckLongPressTimer = setTimeout(() => {
+      openRigModalSecret();
+    }, 1500);
+  });
+
+  duckPet.addEventListener('touchend', () => {
+    if (duckLongPressTimer) clearTimeout(duckLongPressTimer);
+  });
+
+  // Ctrl+Shift+R shortcut
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+      e.preventDefault();
+      initAudio();
+      openModal();
+    }
   });
 
   let audioCtx;
@@ -849,6 +955,14 @@
   function updateWheel() {
     participants = getNames();
     participantCount.textContent = `${participants.length} participant${participants.length !== 1 ? 's' : ''}`;
+
+    // Reset rigging if all participants removed
+    if (participants.length === 0 && rigged) {
+      rigged = false;
+      riggedTarget = '';
+      duckPet.classList.remove('rigged');
+    }
+
     drawWheel();
   }
 
@@ -1001,6 +1115,13 @@
 
   function openModal() {
     const names = getNames();
+
+    // Reset rigging if target is no longer in participants
+    if (rigged && riggedTarget && !names.includes(riggedTarget)) {
+      rigged = false;
+      riggedTarget = '';
+    }
+
     riggedSelect.innerHTML = '';
     names.forEach(name => {
       const opt = document.createElement('option');
@@ -1009,7 +1130,7 @@
       riggedSelect.appendChild(opt);
     });
     riggedToggle.checked = rigged;
-    if (riggedTarget) riggedSelect.value = riggedTarget;
+    if (riggedTarget && names.includes(riggedTarget)) riggedSelect.value = riggedTarget;
     modalOverlay.classList.add('active');
   }
 
@@ -1024,6 +1145,11 @@
   function saveRig() {
     rigged = riggedToggle.checked;
     riggedTarget = riggedSelect.value;
+    if (rigged) {
+      duckPet.classList.add('rigged');
+    } else {
+      duckPet.classList.remove('rigged');
+    }
     closeModal();
   }
 
