@@ -802,14 +802,19 @@
     if (duckLongPressTimer) clearTimeout(duckLongPressTimer);
   });
 
-  // Ctrl+Shift+R shortcut opens modal
+  // Shortcut keys
   document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+    const key = e.key.toLowerCase();
+
+    // Ctrl/Cmd + Shift + R opens modal
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && key === 'r') {
       e.preventDefault();
       initAudio();
       openModal();
     }
-    if (e.altKey && e.shiftKey && e.key === 'R') {
+
+    // Ctrl/Cmd + Alt + R toggles rigging instantly
+    if ((e.ctrlKey || e.metaKey) && e.altKey && key === 'r') {
       e.preventDefault();
       initAudio();
       toggleRigging();
