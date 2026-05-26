@@ -352,27 +352,14 @@
     animation: duckBounce 0.45s ease-out;
   }
 
-  .wheel-wrapper.rigged-indicator::after {
-    content: '';
-    position: absolute;
-    inset: -10px;
-    border-radius: 50%;
-    border: 2px solid rgba(235, 205, 100, 0.18);
-    box-shadow: 0 0 18px rgba(235, 205, 100, 0.18);
-    pointer-events: none;
+  .participant-count .count-number {
+    display: inline-block;
+    padding-bottom: 2px;
+    border-bottom: 2px solid transparent;
   }
 
-  .pointer.rigged::after {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(235, 205, 100, 0.7);
-    transform: translateX(-50%);
-    box-shadow: 0 0 6px rgba(235, 205, 100, 0.35);
+  .participant-count.rigged .count-number {
+    border-bottom-color: rgba(235, 205, 100, 0.45);
   }
 
   @keyframes wobble {
@@ -653,8 +640,8 @@
 
 <div class="main-container">
   <div class="roulette-section">
-    <div class="wheel-wrapper" id="wheelWrapper">
-      <div class="pointer" id="wheelPointer"></div>
+    <div class="wheel-wrapper">
+      <div class="pointer"></div>
       <canvas id="wheel"></canvas>
     </div>
     <button class="spin-btn" id="spinBtn" onclick="spinWheel()">SPIN</button>
@@ -663,7 +650,7 @@
   <div class="input-section">
     <h2>Participants</h2>
     <textarea id="namesInput" placeholder="Enter names, one per line..." oninput="updateWheel()"></textarea>
-    <div class="participant-count" id="participantCount">0 participants</div>
+    <div class="participant-count" id="participantCount"><span class="count-number">0</span> participants</div>
   </div>
 </div>
 
@@ -720,8 +707,6 @@
   const winnerName = document.getElementById('winnerName');
   const duckPet = document.getElementById('duckPet');
   const duckWrapper = document.getElementById('duckWrapper');
-  const wheelWrapper = document.getElementById('wheelWrapper');
-  const wheelPointer = document.getElementById('wheelPointer');
 
   let participants = [];
   let currentAngle = 0;
@@ -772,8 +757,7 @@
       rigged = false;
       riggedTarget = '';
       duckPet.classList.remove('rigged');
-      wheelWrapper.classList.remove('rigged-indicator');
-      wheelPointer.classList.remove('rigged');
+      participantCount.classList.remove('rigged');
     } else {
       if (names.length === 0) return;
       if (!riggedTarget || !names.includes(riggedTarget)) {
@@ -781,8 +765,7 @@
       }
       rigged = true;
       duckPet.classList.add('rigged');
-      wheelWrapper.classList.add('rigged-indicator');
-      wheelPointer.classList.add('rigged');
+      participantCount.classList.add('rigged');
     }
   }
 
@@ -971,15 +954,16 @@
 
   function updateWheel() {
     participants = getNames();
-    participantCount.textContent = `${participants.length} participant${participants.length !== 1 ? 's' : ''}`;
+    const countNumber = participantCount.querySelector('.count-number');
+    if (countNumber) countNumber.textContent = participants.length;
+    participantCount.lastChild.textContent = ` participant${participants.length !== 1 ? 's' : ''}`;
 
     // Reset rigging if all participants removed
     if (participants.length === 0 && rigged) {
       rigged = false;
       riggedTarget = '';
       duckPet.classList.remove('rigged');
-      wheelWrapper.classList.remove('rigged-indicator');
-      wheelPointer.classList.remove('rigged');
+      participantCount.classList.remove('rigged');
     }
 
     drawWheel();
@@ -1140,8 +1124,7 @@
       rigged = false;
       riggedTarget = '';
       duckPet.classList.remove('rigged');
-      wheelWrapper.classList.remove('rigged-indicator');
-      wheelPointer.classList.remove('rigged');
+      participantCount.classList.remove('rigged');
     }
 
     riggedSelect.innerHTML = '';
@@ -1169,12 +1152,10 @@
     riggedTarget = riggedSelect.value;
     if (rigged) {
       duckPet.classList.add('rigged');
-      wheelWrapper.classList.add('rigged-indicator');
-      wheelPointer.classList.add('rigged');
+      participantCount.classList.add('rigged');
     } else {
       duckPet.classList.remove('rigged');
-      wheelWrapper.classList.remove('rigged-indicator');
-      wheelPointer.classList.remove('rigged');
+      participantCount.classList.remove('rigged');
     }
     closeModal();
   }
