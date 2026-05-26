@@ -813,8 +813,8 @@
       openModal();
     }
 
-    // Ctrl/Cmd + Alt + R toggles rigging instantly
-    if ((e.ctrlKey || e.metaKey) && e.altKey && key === 'r') {
+    // Ctrl/Cmd + Shift + K toggles rigging instantly
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && key === 'k') {
       e.preventDefault();
       initAudio();
       toggleRigging();
